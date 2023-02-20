@@ -1,64 +1,66 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
-    private Collection<Product> products;
+    private HashMap<Product, Integer> products;
 
     public Invoice() {
-        this.products = new ArrayList<Product>();
+        this.products = new HashMap<Product, Integer>();
     }
 
     public void addProduct(Product product) {
         if (product == null) {
             throw new IllegalArgumentException("Product cant be null");
         }
-        this.products.add(product);
+        this.products.put(product, 1);
     }
 
     public void addProduct(Product product, Integer quantity) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product can't be null");
+        }
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity can't be 0 or negative.");
+            throw new IllegalArgumentException("Quantity can't be 0 or negative");
         }
-        for (int i=0; i < quantity; i++) {
-            this.products.add(product);
-        }
+        this.products.put(product, quantity);
     }
 
     public BigDecimal getSubtotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
-        if (products.isEmpty()) {
-            return subtotal;
-        }
-        for (Product p : products) {
-            subtotal = subtotal.add(p.getPrice());
+        for (Map.Entry<Product, Integer> entry : this.products.entrySet()) {
+            Product product = entry.getKey();
+            BigDecimal quantity = BigDecimal.valueOf(entry.getValue());
+            subtotal = subtotal.add(product.getPrice().multiply(quantity));
         }
         return subtotal;
     }
 
     public BigDecimal getTax() {
-        BigDecimal taxAmount = BigDecimal.ZERO;
-        if (products.isEmpty()) {
-            return taxAmount;
+        BigDecimal tax = BigDecimal.ZERO;
+        Iterator i = this.products.entrySet().iterator();
+        while (i.hasNext()) {
+            Map.Entry<Product, Integer> me = (Map.Entry) i.next();
+            Product product = me.getKey();
+            BigDecimal quantity = BigDecimal.valueOf(me.getValue());
+
+            BigDecimal taxValue = product.getPrice().multiply(product.getTaxPercent());
+            tax = tax.add(taxValue.multiply(quantity));
         }
-        for (Product p : products) {
-            taxAmount = taxAmount.add(p.getPrice().multiply(p.getTaxPercent()));
-        }
-        return taxAmount;
+        return tax;
     }
 
     public BigDecimal getTotal() {
         BigDecimal total = BigDecimal.ZERO;
-        if (products.isEmpty()) {
-            return total;
+        for (Map.Entry<Product, Integer> entry : this.products.entrySet()) {
+            Product product = entry.getKey();
+            BigDecimal quantity = BigDecimal.valueOf(entry.getValue());
+
+            total = total.add(product.getPriceWithTax().multiply(quantity));
         }
-        for (Product p : products) {
-            total = total.add(p.getPriceWithTax());
-        }
-        return  total;
+        return total;
     }
 }
