@@ -62,6 +62,7 @@ public class Invoice {
         }
         return totalGross;
     }
+
     public long getInvoiceNumber() {
         return invoiceNumber;
     }
