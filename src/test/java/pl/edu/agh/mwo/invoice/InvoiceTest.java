@@ -125,4 +125,56 @@ public class InvoiceTest {
     public void testAddingNullProduct() {
         invoice.addProduct(null);
     }
+
+    @Test
+    public void testInvoiceHasProperNumberOfPositions() {
+        // 2x chleb - price with tax: 10
+        invoice.addProduct(new TaxFreeProduct("Chleb", new BigDecimal("5")), 2);
+        // 3x chedar - price with tax: 32.40
+        invoice.addProduct(new DairyProduct("Chedar", new BigDecimal("10")), 3);
+        // 1000x pinezka - price with tax: 12.30
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        Assert.assertThat(3, Matchers.comparesEqualTo(invoice.getNumberOfPositions()));
+    }
+
+    @Test
+    public void testInvoiceHasZeroNumberOfPositions() {
+        Assert.assertThat(0, Matchers.comparesEqualTo(invoice.getNumberOfPositions()));
+    }
+
+    @Test
+    public void testInvoiceNumber() {
+        Invoice invoice2 = new Invoice();
+        Assert.assertThat(1L, Matchers.comparesEqualTo(invoice.getInvoiceNumber()));
+        Assert.assertThat(2L, Matchers.comparesEqualTo(invoice2.getInvoiceNumber()));
+    }
+
+    @Test
+    public void testGetProductQuantityNumber() {
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        Assert.assertThat(1000, Matchers.comparesEqualTo(invoice.getProductQuantity(new OtherProduct("Pinezka", new BigDecimal("0.01")))));
+    }
+
+    @Test
+    public void testIfInvoiceContainsDuplicate() {
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        Product product = new OtherProduct("Pinezka", new BigDecimal("0.01"));
+        Assert.assertTrue(invoice.checkIfInvoiceHasProduct(product));
+    }
+
+    @Test
+    public void testInvoiceForDuplicates() {
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+        Assert.assertThat(1, Matchers.comparesEqualTo(invoice.getNumberOfPositions()));
+        Assert.assertThat(2000, Matchers.comparesEqualTo(invoice.getProductQuantity(new OtherProduct("Pinezka", new BigDecimal("0.01")))));
+    }
+
+    @Test
+    public void testInvoiceForDuplicatesAddProductWithoutQuantity() {
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")));
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")));
+        Assert.assertThat(1, Matchers.comparesEqualTo(invoice.getNumberOfPositions()));
+        Assert.assertThat(2, Matchers.comparesEqualTo(invoice.getProductQuantity(new OtherProduct("Pinezka", new BigDecimal("0.01")))));
+    }
 }

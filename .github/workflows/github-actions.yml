@@ -18,7 +18,7 @@ jobs:
           distribution: 'adopt'
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
       - name: Run Maven tests
         run: mvn test
   lint:
