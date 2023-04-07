@@ -15,7 +15,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'adopt'
       - name: Checkout code
         uses: actions/checkout@v2
 
